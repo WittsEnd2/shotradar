@@ -2,28 +2,48 @@
   var client = new BinaryClient('ws://localhost:9001');
 
   client.on('open', function() {
-    window.Stream = client.createStream();
 
-    if (!navigator.getUserMedia)
-      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
-    if (navigator.getUserMedia) {
-      navigator.getUserMedia({audio:true}, success, function(e) {
-        alert('Error capturing audio.');
-      });
-    } else alert('getUserMedia not supported in this browser.');
-
+    var continuous = true;
     var recording = false;
+    setInterval(function(){
+      window.Stream = client.createStream();
 
+      if (!navigator.getUserMedia)
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia || navigator.msGetUserMedia;
+  
+      if (navigator.getUserMedia) {
+        navigator.getUserMedia({audio:true}, success, function(e) {
+          alert('Error capturing audio.');
+        });
+      } else alert('getUserMedia not supported in this browser.');
+      setTimeout(function(){
+        window.Stream.end();
+      }, 2750)      
+    }, 3000); 
     window.startRecording = function() {
       recording = true;
-    }
+      window.Stream = client.createStream();
 
+      if (!navigator.getUserMedia)
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia || navigator.msGetUserMedia;
+  
+      if (navigator.getUserMedia) {
+        navigator.getUserMedia({audio:true}, success, function(e) {
+          alert('Error capturing audio.');
+        });
+      } else alert('getUserMedia not supported in this browser.');
+    }
+    
     window.stopRecording = function() {
       recording = false;
       window.Stream.end();
     }
+    window.setContinuousToFalse = function() {
+      continuous = false;
+    }
+    console.log("continuous");
 
     function success(e) {
       audioContext = window.AudioContext || window.webkitAudioContext;
@@ -42,7 +62,7 @@
         window.Stream.write(convertoFloat32ToInt16(left));
       }
 
-      audioInput.connect(recorder)
+      audioInput.connect(recorder);
       recorder.connect(context.destination); 
     }
 

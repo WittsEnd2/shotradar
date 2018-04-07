@@ -21,23 +21,51 @@ app.listen(port);
 console.log('server open on port ' + port);
 
 binaryServer = BinaryServer({port: 9001});
-
-binaryServer.on('connection', function(client) {
-  console.log('new connection');
-
-  var fileWriter = new wav.FileWriter(outFile, {
-    channels: 1,
-    sampleRate: 48000,
-    bitDepth: 16
-  });
-
-  client.on('stream', function(stream, meta) {
-    console.log('new stream');
-    stream.pipe(fileWriter);
-
-    stream.on('end', function() {
-      fileWriter.end();
-      console.log('wrote to file ' + outFile);
+var active = false; 
+setInterval(function() {
+  if (active === false) {
+    active = true; 
+    binaryServer.on('connection', function(client) {
+      console.log('new connection');
+  
+      var fileWriter = new wav.FileWriter(outFile, {
+        channels: 1,
+        sampleRate: 48000,
+        bitDepth: 16
+      });
+  
+      client.on('stream', function(stream, meta) {
+        console.log('new stream');
+        stream.pipe(fileWriter);
+  
+        stream.on('end', function() {
+          fileWriter.end();
+          console.log('wrote to file ' + outFile);
+          active = false;
+        });
+      });
     });
-  });
-});
+  }
+}, 500);    
+// binaryServer.on('connection', function(client) {
+//     console.log('new connection');
+  
+//     var fileWriter = new wav.FileWriter(outFile, {
+//       channels: 1,
+//       sampleRate: 48000,
+//       bitDepth: 16
+//     });
+  
+//     client.on('stream', function(stream, meta) {
+//       console.log('new stream');
+//       stream.pipe(fileWriter);
+  
+//       stream.on('end', function() {
+//         fileWriter.end();
+//         console.log('wrote to file ' + outFile);
+//       });
+//     });
+//   });
+//   turnOn = true;
+
+
