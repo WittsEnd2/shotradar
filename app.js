@@ -21,10 +21,12 @@ app.listen(port);
 console.log('server open on port ' + port);
 
 binaryServer = BinaryServer({port: 9001});
-var active = false; 
+var active = false;
+var counter = 0;  
 setInterval(function() {
   if (active === false) {
     active = true; 
+    outFile = "demo" + counter + ".wav";
     binaryServer.on('connection', function(client) {
       console.log('new connection');
   
@@ -42,6 +44,7 @@ setInterval(function() {
           fileWriter.end();
           console.log('wrote to file ' + outFile);
           active = false;
+          counter++;
         });
       });
     });

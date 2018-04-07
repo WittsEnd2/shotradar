@@ -19,7 +19,7 @@
       } else alert('getUserMedia not supported in this browser.');
       setTimeout(function(){
         window.Stream.end();
-      }, 2750)      
+      }, 2900)      
     }, 3000); 
     window.startRecording = function() {
       recording = true;
