@@ -1,13 +1,192 @@
+<!doctype html>
 <html>
+
 <head>
-  <title>AudioPlayground</title>
-  <style>* {box-sizing: border-box;}</style>
+  meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+    <title>ShootRadar Map</title>
+    <style>
+      body {
+          background-color: black;
+      }
+      .mainTitle {
+          color: white;
+      }
+      #alarmButton {
+          height: 85%;
+          width: 100%;
+          font-size: 50px;
+      }
+      .deviceRow {
+        margin-bottom: 10px;
+      }
+      .row .device {
+          margin-right: auto;
+          margin-left: auto;
+          min-height: 50px;
+          max-width: 30%;
+          border-top: 2px solid white;
+          border-bottom: 2px solid white;
+          border-left: 2px solid white;
+          border-right: 2px solid white;
+      }
+      .row .device:hover {
+          background-color: red;
+      }
+      /* .row .device:last-child {
+          border-right: 2px solid white;
+      } */
+      .emergencyTab{
+          background-color: darkred;
+          color: white;
+          height: 100px;
+      }
+      .emergencyTab:hover {
+          background-color: red;
+      }
+      .caretIcon {
+          margin-top: 40px;
+          font-size: 20px;
+      }
+      .contentTab {
+          display: none;
+          color: white;
+          border-left: 2px solid gray;
+          border-bottom: 2px solid gray;
+          border-right: 2px solid gray;
+      }
+
+      footer {
+          height: 30px;
+          background-color: darkred;
+          color: white;
+      }
+      .changeColorNav {
+          background-color: black;
+          color: white;
+      }
+      .fixed-bottom {
+          position:fixed;
+          bottom: 0px;
+          color: white;
+          background-color: darkred;
+      }
+      .footerLink {
+          color: white;
+      }
+
+    </style>
 </head>
+
 <body>
-  <h3>AudioPlayground</h3>
-  <p>If you're happy and you know it, clap your hands!</p>
-  <script>
-    var Recording = function(cb){
+  <div class = "container" id = "tables">
+
+      <div class = "row text-center">
+          <div class = "col-md-12">
+              <h1 class="mainTitle">Map</h1>
+          </div>
+      </div>
+  </div>
+  <footer class = "fixed-bottom">
+      <div class = "container">
+          <div class = "row">
+                  <div class = "col-md-10">
+                      <a href = "https://floating-gorge-79216.herokuapp.com/tips" class = "footerLink"><p>Click here for more information</p></a>
+                  </div>
+                  <div class = "col-md-2 text-right">
+                      <p class = "footer-text">User: C1</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </footer>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var active = false;
+      $('.emergencyTab').click(function(){
+          if (active === false) {
+              $('.contentTab').css('display','block');
+              $('.emergencyTab').css("background-color", "red");
+              active = true;
+          } else {
+              $('.contentTab').css('display', 'none');
+              $('.emergencyTab').css("background-color", "darkred");
+              active = false;
+          }
+      });
+
+      $('.footer').click(function(){
+          window.location.replace('tips.html');
+      })
+
+    </script>
+
+    <script>
+        var USER; // GLOBAL FOR IDENITY
+        console.log(USER);
+        var counter=0;
+        var threeCounter = 1;
+        var lastShot = "";
+
+        // we make sure to only run this once the document is loaded
+        $(function() {
+            // connect to socket
+
+            var socket = io();
+
+            $.ajax({
+                method: "GET",
+                url: "https://floating-gorge-79216.herokuapp.com/users",
+                success: function(data) {
+                    counter = data.counter;
+                    lastShot = data.lastShot;
+
+                    console.log("Data Point Last Shot: ", data);
+                    prepopulate(data.counter);
+                    if((data.lastShot).length !== 0)
+                      $("#" + lastShot).css("background-color", "red");
+                }
+            });
+
+            console.log("Last Shot: " + lastShot);
+
+
+
+            //prepopulate(counter);
+            // catch to find the name of the user itself
+            socket.on('new_user', function(user) {
+                if (!USER){
+                  USER = user;
+                  // set the user name in map
+                  $('.footer-text').text("User: " + USER);
+
+
+
+
+                } else {
+                  counter++;
+                  if (Math.ceil(counter/3) > threeCounter){
+                    threeCounter++;
+                  }
+                }
+                console.log("Counter: " + counter);
+                if (counter % 3 === 1) {
+                  var newHTML = '<div class = "row text-center deviceRow" id = "row' + threeCounter +'"><div class = "col-4 device" id = "c'+counter+'"></div></div>';
+                  $('#tables').append(newHTML);
+                } else {
+                  var newHTML = '<div class = "col-4 device" id = "c'+counter+'"></div>';
+                  $('#row' + threeCounter).append(newHTML);
+                }
+
+            });
+
+            var Recording = function(cb){
       var recorder = null;
       var recording = true;
       var audioInput = null;
@@ -48,7 +227,7 @@
       if(t - lastClap < 200) return false; // TWEAK HERE
       var zeroCrossings = 0, highAmp = 0;
       for(var i = 1; i < data.length; i++){
-        if(Math.abs(data[i]) > 0.5) highAmp++; // TWEAK HERE
+        if(Math.abs(data[i]) > 0.7) highAmp++; // TWEAK HERE
         if(data[i] > 0 && data[i-1] < 0 || data[i] < 0 && data[i-1] > 0) zeroCrossings++;
       }
       if(highAmp > 20 && zeroCrossings > 30){ // TWEAK HERE
@@ -58,13 +237,42 @@
       }
       return false;
     }
-    var rec = new Recording(function(data){
-      if(detectClap(data)){
-        console.log('clap!');
-        // INSERT CODE HERE TO SEND GEOLOCATION
-        document.bgColor = 'rgb('+Math.random()*255+','+Math.random()*255+','+Math.random()*255+')';
-      }
-    });
-  </script>
+            // start the recordable object
+            var rec = new Recording(function(data) {
+                if (detectClap(data)) {
+                    // if detected
+                    socket.emit('clap_detected', USER); // emit that the clap was detected
+
+                }
+            });
+
+            // for on clap detected
+            socket.on('clap_detected', function(data) {
+              // collor past to defualt
+              $('.device').css("background-color", "black");
+
+              // collor current to red
+                $('#' + data.curr).css("background-color", "red");
+            });
+
+        }); // end of function document load
+
+        function prepopulate(counter) {
+          console.log("prepopulate counter: " + counter);
+          for (i = 1; i < counter; i++) {
+            if (i % 3 === 1) {
+              var newHTML = '<div class = "row text-center deviceRow" id = "row' + threeCounter +'"><div class = "col-4 device" id = "c'+i+'"></div></div>';
+              $('#tables').append(newHTML);
+            } else {
+              var newHTML = '<div class = "col-4 device" id = "c'+i+'"></div>';
+              $('#row' + threeCounter).append(newHTML);
+            }
+            if (Math.ceil((i+1)/3) > threeCounter) {
+              threeCounter += 1;
+            }
+          }
+        }
+    </script>
 </body>
+
 </html>

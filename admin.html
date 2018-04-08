@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>ADMIN: ShootRadar</title>
+
+</head>
+
+<body>
+    <p id='tracker'> SHOOTING TRACKER:
+        <br> </p>
+        <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var USER; // GLOBAL FOR IDENITY
+
+
+        // we make sure to only run this once the document is loaded
+        $(function() {
+            // connect to socket
+            var socket = io();
+            // catch to find the name of the user itself
+            socket.on('new_user', function(user) {
+                console.log("here");
+                if (!USER)
+                    USER = user;
+            });
+
+            var Recording = function(cb){
+      var recorder = null;
+      var recording = true;
+      var audioInput = null;
+      var volume = null;
+      var audioContext = null;
+      var callback = cb;
+      navigator.getUserMedia = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                               navigator.mozGetUserMedia || navigator.msGetUserMedia;
+      if(navigator.getUserMedia){
+        navigator.getUserMedia({audio:true},
+          function(e){ //success
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioContext();
+            volume = audioContext.createGain(); // creates a gain node
+            audioInput = audioContext.createMediaStreamSource(e); // creates an audio node from the mic stream
+            audioInput.connect(volume);// connect the stream to the gain node
+            recorder = audioContext.createScriptProcessor(2048, 1, 1);
+            recorder.onaudioprocess = function(e){
+                if(!recording) return;
+                var left = e.inputBuffer.getChannelData(0);
+                //var right = e.inputBuffer.getChannelData(1);
+                callback(new Float32Array(left));
+            };
+            volume.connect(recorder);// connect the recorder
+            recorder.connect(audioContext.destination);
+          },
+          function(e){ //failure
+            alert('Error capturing audio.');
+          }
+        );
+      } else {
+        alert('getUserMedia not supported in this browser.');
+      }
+    };
+    var lastClap = (new Date()).getTime();
+    function detectClap(data){
+      var t = (new Date()).getTime();
+      if(t - lastClap < 200) return false; // TWEAK HERE
+      var zeroCrossings = 0, highAmp = 0;
+      for(var i = 1; i < data.length; i++){
+        if(Math.abs(data[i]) > 0.7) highAmp++; // TWEAK HERE
+        if(data[i] > 0 && data[i-1] < 0 || data[i] < 0 && data[i-1] > 0) zeroCrossings++;
+      }
+      if(highAmp > 20 && zeroCrossings > 30){ // TWEAK HERE
+        //console.log(highAmp+' / '+zeroCrossings);
+        lastClap = t;
+        return true;
+      }
+      return false;
+    }
+            // start the recordable object
+            var rec = new Recording(function(data) {
+                if (detectClap(data)) {
+                    // if detected
+                    socket.emit('clap_detected', USER); // emit that the clap was detected
+
+                }
+            });
+
+            // for on clap detected
+            socket.on('clap_detected', function(data) {
+                  console.log(data);
+                $('#tracker').append(data.curr);
+            });
+
+        }); // end of function document load
+    </script>
+</body>
+
+</html>
+---
