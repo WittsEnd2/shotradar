@@ -1,0 +1,68 @@
+body {
+    background-color: black;
+}
+.mainTitle {
+    color: white;
+}
+#alarmButton {
+    height: 85%;
+    width: 100%;
+    font-size: 50px;
+}
+.row .device {
+    margin-right: auto;
+    margin-left: auto;
+    min-height: 50px;
+    max-width: 30%;
+    border-top: 2px solid white; 
+    border-bottom: 2px solid white; 
+    border-left: 2px solid white; 
+    border-right: 2px solid white;
+}
+.row .device:hover {
+    background-color: red;
+}
+/* .row .device:last-child {
+    border-right: 2px solid white;
+} */
+.notFirst {
+    margin-top: 10px;
+}
+.emergencyTab{
+    background-color: darkred;
+    color: white;
+    height: 100px;
+}
+.emergencyTab:hover {
+    background-color: red;
+}   
+.caretIcon {
+    margin-top: 40px;
+    font-size: 20px;
+}
+.contentTab {
+    display: none;
+    color: white;
+    border-left: 2px solid gray;
+    border-bottom: 2px solid gray;
+    border-right: 2px solid gray;
+}
+
+footer {
+    height: 30px;
+    background-color: darkred;
+    color: white;
+}
+.changeColorNav {
+    background-color: black;
+    color: white;
+}
+.fixed-bottom {
+    position:fixed;
+    bottom: 0px;
+    color: white;
+    background-color: darkred;
+}
+.footerLink {
+    color: white;
+}
