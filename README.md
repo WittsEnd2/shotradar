@@ -1,3 +1,4 @@
+# ShotRadar
 ## Inspiration
 With the recent mass shooting events that are occurring throughout the United States, we wanted to help keep people safe and know what to do during this event. We realize that there is not much training that is occurring, and even if someone is trained in a situation, there is generally a fight or flight response due to panic. Therefore, this app will give advice based on the location of the shooter and where they are in a building. 
 
